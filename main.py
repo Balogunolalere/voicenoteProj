@@ -22,11 +22,12 @@ app = FastAPI(
     description="A simple API to upload and listen to audio notes",
     version="0.1.0"
 )
-deta = Deta("DETA_PROJECT_KEY")
+deta = Deta(DETA_PROJECT_KEY)
 
 
-drive = deta.Drive("DRIVE_PROJECT_NAME")
-base = deta.Base("BASE_PROJECT_NAME")
+drive = deta.Drive(DRIVE_PROJECT_NAME)
+base = deta.Base(BASE_PROJECT_NAME)
+
 
 
 async def upload_file_to_drive(file_id: str, file_content: BytesIO):
@@ -53,7 +54,7 @@ async def create_note(background_tasks: BackgroundTasks, file: UploadFile = File
     if file.filename.split(".")[-1] not in supported_audio_formats:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unsupported audio format")
     file_id = str(uuid.uuid4())
-    file_upload_date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    file_upload_date = datetime.now().date().strftime("%Y-%m-%d")
     try:
         # create two in-memory file-like objects from the uploaded file bytes
         content1 = BytesIO(await file.read())
@@ -140,4 +141,13 @@ async def delete_note(background_tasks: BackgroundTasks, file_id: str):
     except Exception as e:
         return {"error": str(e)}
     
-  
+# end point to search by date
+@app.get("/notes/search/{date}")
+async def search_by_date(date: str):
+    try:
+        notes = base.fetch({"upload_date": date})
+        if not notes:
+            return []
+        return notes
+    except Exception as e:
+        return {"error": str(e)}
