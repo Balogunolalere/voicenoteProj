@@ -2,11 +2,12 @@ from fastapi import FastAPI, File, UploadFile, HTTPException, status, Background
 from fastapi.responses import StreamingResponse
 from deta import Deta
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 import mutagen
 from io import BytesIO
 import os
 from dotenv import load_dotenv
+
 
 
 # Load environment variables
@@ -67,7 +68,10 @@ async def create_note(background_tasks: BackgroundTasks, file: UploadFile = File
         # extract required information from audio_pprint
         audio_pprint_lines = audio_pprint.split("\n")
         audio_format = audio_pprint_lines[0].split(",")[0]
-        audio_duration = float(audio_pprint_lines[0].split(",")[1].split()[0])
+        duration = audio.info.length
+        duration_timedelta = timedelta(seconds=duration)
+        duration_datetime = datetime(1, 1, 1) + duration_timedelta
+        audio_duration = duration_datetime.strftime('%M:%S')
         audio_mime_type = audio_pprint_lines[0].split("(")[1].split(")")[0]
         audio_encoder = audio_pprint_lines[1].split("=")[1]
 
