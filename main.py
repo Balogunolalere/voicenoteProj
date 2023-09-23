@@ -40,7 +40,7 @@ async def upload_file_metadata_to_base(file_id: str, file_upload_date: str, audi
         "file_id": file_id,
         "upload_date": file_upload_date,
         "format": audio_format,
-        "duration_seconds": audio_duration,
+        "duration": audio_duration,
         "mime_type": audio_mime_type,
         "encoder": audio_encoder,
         "file_size_in_bytes": file_size
@@ -89,7 +89,7 @@ async def create_note(background_tasks: BackgroundTasks, file: UploadFile = File
         "file_id": file_id,
         "upload_date": file_upload_date,
         "format": audio_format,
-        "duration_seconds": audio_duration,
+        "duration": audio_duration,
         "mime_type": audio_mime_type,
         "encoder": audio_encoder,
         "file_size_in_bytes": file_size
