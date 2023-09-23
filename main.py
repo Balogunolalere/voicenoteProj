@@ -34,14 +34,15 @@ async def upload_file_to_drive(file_id: str, file_content: BytesIO):
     drive.put(file_id, file_content)
 
 
-async def upload_file_metadata_to_base(file_id: str, file_upload_date: str, audio_format: str, audio_duration: float, audio_mime_type: str, audio_encoder: str):
+async def upload_file_metadata_to_base(file_id: str, file_upload_date: str, audio_format: str, audio_duration: float, audio_mime_type: str, audio_encoder: str, file_size: int):
     base.put({
         "file_id": file_id,
         "upload_date": file_upload_date,
         "format": audio_format,
         "duration_seconds": audio_duration,
         "mime_type": audio_mime_type,
-        "encoder": audio_encoder
+        "encoder": audio_encoder,
+        "file_size_in_bytes": file_size
     })
 
 
@@ -69,6 +70,10 @@ async def create_note(background_tasks: BackgroundTasks, file: UploadFile = File
         audio_duration = float(audio_pprint_lines[0].split(",")[1].split()[0])
         audio_mime_type = audio_pprint_lines[0].split("(")[1].split(")")[0]
         audio_encoder = audio_pprint_lines[1].split("=")[1]
+
+        # calculate file size
+        file_size = content1.getbuffer().nbytes
+
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'File upload failed: {e}')
 
@@ -82,7 +87,8 @@ async def create_note(background_tasks: BackgroundTasks, file: UploadFile = File
         "format": audio_format,
         "duration_seconds": audio_duration,
         "mime_type": audio_mime_type,
-        "encoder": audio_encoder
+        "encoder": audio_encoder,
+        "file_size_in_bytes": file_size
     }
 
 @app.get("/notes/metadata")
@@ -111,8 +117,7 @@ async def listen_to_note_by_id(file_id: str):
         raise HTTPException(status_code=404, detail="File with id not found")
     try:
         note = drive.get(file_id)
-        metadeta = base.fetch({"file_id": file_id}).items[0]
-        return StreamingResponse(note.iter_chunks(1024), media_type=f"{metadeta['mime_type']}")
+        return StreamingResponse(note.iter_chunks(1024), media_type="audio/mpeg")
     except Exception as e:
         return {"error": str(e)}
     
@@ -123,8 +128,7 @@ async def download_note_by_id(file_id: str):
     try:
         note = drive.get(file_id)
         metadeta = base.fetch({"file_id": file_id}).items[0]
-        # return StreamingResponse(note.iter_chunks(1024), media_type="audio/mpeg", headers={"Content-Disposition": "attachment; filename=note.mp3"})
-        return StreamingResponse(note.iter_chunks(1024), media_type=f"{metadeta['mime_type']}", headers={"Content-Disposition": f"attachment; filename={metadeta['file_id']}.{metadeta['format']}"})
+        return StreamingResponse(note.iter_chunks(1024), media_type="audio/mpeg", headers={"Content-Disposition": f"attachment; filename={metadeta['file_id']}.{metadeta['format']}"})
     except Exception as e:
         return {"error": str(e)}
     
