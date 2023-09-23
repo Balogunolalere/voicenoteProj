@@ -79,7 +79,7 @@ async def create_note(background_tasks: BackgroundTasks, file: UploadFile = File
 
     # add background tasks to upload file to Drive and metadata to Base
     background_tasks.add_task(upload_file_to_drive, file_id, content2)
-    background_tasks.add_task(upload_file_metadata_to_base, file_id, file_upload_date, audio_format, audio_duration, audio_mime_type, audio_encoder)
+    background_tasks.add_task(upload_file_metadata_to_base, file_id, file_upload_date, audio_format, audio_duration, audio_mime_type, audio_encoder, file_size)
 
     return {
         "file_id": file_id,
