@@ -1,0 +1,14 @@
+# Spacefile Docs: https://go.deta.dev/docs/spacefile/v0
+v: 0
+micros:
+  - name: voicenoteProj
+    src: ./
+    engine: python3.9
+    primary: true
+    public_routes:
+      - "/*"
+    presets:
+      env:
+        - name: PROJECT_KEY
+        - name: DRIVE_PROJECT_NAME
+        - name: BASE_PROJECT_NAME

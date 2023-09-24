@@ -159,3 +159,7 @@ async def search_by_date(date: str):
         return notes
     except Exception as e:
         return {"error": str(e)}
+
+@app.get('/')
+async def index():
+    return {"message": "Welcome to Note API!"}
